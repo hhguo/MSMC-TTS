@@ -13,4 +13,4 @@ The system is optimized with a MSMC-VQ-GAN based autoencoder for representation 
 
 [4]: <a href="https://github.com/mindslab-ai/univnet" title="FastSpeech">Reference code for UnivNet Discriminator</a>
 
-[4]: <a href="https://github.com/jaywalnut310/vits" title="FastSpeech">Implementation of VITS</a>
+[5]: <a href="https://github.com/jaywalnut310/vits" title="FastSpeech">Implementation of VITS</a>
