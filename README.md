@@ -1,12 +1,13 @@
 # MSMC-TTS: Multi-Stage Multi-Codebook TTS
-Official Implement of MSMC-TTS System of papers ["A Multi-Stage Multi-Codebook VQ-VAE Approach to High-Performance Neural TTS"](https://arxiv.org/abs/2209.10887) and ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Representation"](https://arxiv.org/abs/2209.10887)
+Official Implement of MSMC-TTS System of papers ["A Multi-Stage Multi-Codebook VQ-VAE Approach to High-Performance Neural TTS"](https://arxiv.org/abs/2209.10887) and ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Speech Representations
+"](https://arxiv.org/abs/2210.15131)
 
 The latest MSMC-TTS (MSMC-TTS-v2) is optimized with a MSMC-VQ-GAN based autoencoder combining MSMC-VQ-VAE and HifiGAN. The multi-stage predictor is still applied as the acoustic model to predict MSMCRs for TTS synthesis.
 ![avatar](figs/MSMC-VQGAN.png)
 
 ## News
 
-[2022.10.20] We release the latest version of MSMC-TTS (MSMC-TTS-v2) based on MSMC-VQ-GAN. Please refer to our latest paper ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Representation"](https://arxiv.org/abs/2209.10887)
+[2022.10.28] We release the latest version of MSMC-TTS (MSMC-TTS-v2) based on MSMC-VQ-GAN. Please refer to our latest paper ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Representation"](https://arxiv.org/abs/2209.10887)
 
 [2022.10.18] We will release the code of all versions of MSMC-TTS in this repo. And anyone interested in this work is welcome to join us to explore more useful speech representations for speech synthesis. 
 
@@ -57,6 +58,7 @@ Help you better train your models!
   booktitle={Proc. INTERSPEECH},
   year={2022}
 }
+
 ```
 
 ## Acknowledge
