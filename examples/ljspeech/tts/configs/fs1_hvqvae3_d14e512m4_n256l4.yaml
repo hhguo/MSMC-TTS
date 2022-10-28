@@ -1,0 +1,145 @@
+id: "fastspeech1_hvqvae3_d14e512m4_n256l4"
+
+#################################################
+# Task configuration
+#################################################
+
+task:
+    _name: "TTS"
+    network:
+        acoustic_model:
+            _name: "FastSpeechNvi"
+            n_symbols: 160
+            n_mel: 512
+            n_model_size: 256
+            encoder_config:
+                max_seq_len: 240
+                n_layers: 4
+                n_head: 2
+                d_k: 64
+                d_v: 64
+                d_model: 256
+                d_inner: 1024
+                fft_conv1d_kernel: 3
+                fft_conv1d_padding: 1
+                dropout: 0.1
+                name: phoneme_side
+                fused_layernorm: False
+            adaptor_config:
+                input_size: 256
+                duration_predictor_filter_size: 256
+                duration_predictor_kernel_size: 3
+                dropout: 0.1
+                fused_layernorm: False
+            decoder_config:
+                max_seq_len: 2400
+                n_layers: 4
+                n_head: 2
+                d_k: 64
+                d_v: 64
+                d_model: 256
+                d_inner: 1024
+                fft_conv1d_kernel: 3
+                fft_conv1d_padding: 1
+                dropout: 0.1
+                name: mel_side
+                fused_layernorm: False
+        autoencoder:
+            _name: "HierarchicalVQVAE3"
+            in_dim: 80
+            n_model_size: 256
+            downsample_scales: [1, 4]
+            embedding_sizes: [512, 512]
+            n_heads: 4
+            transformer_config:
+                max_seq_len: 2400
+                n_layers: 4
+                n_head: 2
+                d_k: 64
+                d_v: 64
+                d_model: 256
+                d_inner: 1024
+                fft_conv1d_kernel: 3
+                fft_conv1d_padding: 1
+                dropout: 0.1
+                fused_layernorm: False
+    vocoder:
+        # _name: GriffinLim
+        _name: NeuralVocoder
+        checkpoint: egs/ljspeech/voc/checkpoints/hifigan/model_200000
+        # checkpoint: egs/vctk/voc/checkpoints/hifigan/model_150000
+
+#################################################
+# Trainer configuration
+#################################################
+
+# Basic hyperparameters
+save_checkpoint_dir: "egs/ljspeech/tts/checkpoints/fastspeech1_hvqvae3_d14e512m4_n256l4"
+pretrain_checkpoint_path: [
+    ["autoencoder.*", "egs/ljspeech/tts/checkpoints/hvqvae3_d14e512m4_n256l4/model_200000"]
+]
+restore_checkpoint_path: ""
+resume_training: True
+training_steps: 500000
+iters_per_checkpoint: 5000
+seed: 1234
+
+# CuDNN configuration
+cudnn:
+    enabled: True
+    benchmark: True
+
+# Specific trainer hyperparameters
+trainer:
+    _name: 'FastspeechAETrainer'
+    training_methods: ['mse', 'triple']
+    loss_weights: [1.0, 1.0]
+
+optimizer:
+    _default:
+        _name: "LookaheadRAdam"
+        lookahead_k: 5
+        lookahead_alpha: 0.5
+        betas: [0.9, 0.999]
+        eps: 1e-8
+        weight_decay: 0
+        learning_rate: 1e-3
+    
+dataloader:
+    batch_size: 64
+    num_workers: 8
+
+dataset:
+    _name: 'TTSDataset'
+    id_list: "/data/hhguo/corpus/ljspeech/train_tts.list"
+    samplerate: 24000
+    feature: ['text', 'dur', 'mel']
+    feature_path:
+        - /data/hhguo/corpus/ljspeech/phone.txt
+        - /data/hhguo/corpus/ljspeech/dur.txt
+        - /data/hhguo/corpus/ljspeech/mel/{}.npy
+    dimension: [1, 1, 80]
+    padding_value: [0, 0, -4]
+    frameshift: [null, null, 300]
+    pre_load: True
+    segment_length: -1 # all
+
+lr_scheduler:
+    _name: "ExponentialDecayLRScheduler"
+    warmup_steps: 50000
+    decay_scale: 50000
+    decay_learning_rate: 0.5
+    final_learning_rate: 1e-6
+
+# Only for Multi-GPU Training
+distributed:
+    dist_backend: "nccl"
+    dist_url: "tcp://localhost:54321"
+
+#################################################
+# Infer configuration
+#################################################
+
+save_features:
+    - ['mel', '.png', null]
+    - ['wav', '.wav', 24000]

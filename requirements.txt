@@ -1,0 +1,14 @@
+numpy>=1.20.*
+torch>=1.6.0
+tensorboardX>=2.0
+scipy>=1.4.1
+SoundFile>=0.10.3.post1
+librosa>=0.8.0
+PyYAML>=5.1
+tqdm>=4.1.0
+h5py>=2.10.0
+tables>=3.6.1
+plot>=0.6.5
+fire>=0.2.0
+typeguard
+cython

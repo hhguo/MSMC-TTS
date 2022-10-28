@@ -1,0 +1,126 @@
+id: "msmc_vq_gan_am"
+
+#################################################
+# Task configuration
+#################################################
+
+task:
+    _name: "MSMCTTS"
+    _mode: "train_predictor"
+    predictor:
+        _name: "MultiStagePredictor"
+        n_symbols: [100, 10, 2]
+        n_model_size: 600
+        n_pred_size: 256
+        n_pred_scale: [4, 1]
+        encoder_config:
+            max_seq_len: 240
+            n_layers: 6
+            n_head: 2
+            d_k: 64
+            d_v: 64
+            d_model: 600
+            d_inner: 1536
+            fft_conv1d_kernel: 3
+            fft_conv1d_padding: 1
+            dropout: 0.1
+            name: phoneme_side
+            fused_layernorm: False
+        adaptor_config:
+            input_size: 600
+            duration_predictor_filter_size: 256
+            duration_predictor_kernel_size: 3
+            dropout: 0.1
+            fused_layernorm: False
+        decoder_config:
+            max_seq_len: 2400
+            n_layers: 6
+            n_head: 2
+            d_k: 64
+            d_v: 64
+            d_model: 600
+            d_inner: 1536
+            fft_conv1d_kernel: 3
+            fft_conv1d_padding: 1
+            dropout: 0.1
+            name: mel_side
+            fused_layernorm: False
+    autoencoder:
+        _config: examples/csmsc/configs/msmc_vq_gan.yaml
+        _checkpoint: examples/csmsc/checkpoints/msmc_vq_gan/model_800000
+        _trainable: False
+
+#################################################
+# Trainer configuration
+#################################################
+
+# Basic hyperparameters
+save_checkpoint_dir: "examples/csmsc/checkpoints/msmc_vq_gan_am"
+pretrain_checkpoint_path: ""
+restore_checkpoint_path: ""
+resume_training: True
+training_steps: 200000
+iters_per_checkpoint: 50000
+seed: 1234
+
+# CuDNN configuration
+cudnn:
+    enabled: True
+    benchmark: True
+
+# Specific trainer hyperparameters
+trainer:
+    _name: 'PredictorTrainer'
+    grad_clip_thresh: 10.0
+    training_methods: ['mse', 'triple_sum']
+    loss_weights:
+        - [1.0, 1.0]
+        - [1.0, 1.0]
+    lambda_dur: 1.0
+
+optimizer:
+    _default:
+        _name: "Adam"
+        betas: [0.9, 0.98]
+        eps: 1e-9
+        weight_decay: 0
+        learning_rate: 2e-4
+    
+dataloader:
+    batch_size: 64
+    num_workers: 8
+
+dataset:
+    _name: 'TTSDataset'
+    id_list: "examples/csmsc/data/filelists/train.list"
+    samplerate: 24000
+    feature: ['text', 'dur', 'mel']
+    feature_path:
+        - examples/csmsc/data/phone.txt
+        - examples/csmsc/data/dur.txt
+        - examples/csmsc/data/mel/{}.npy
+    dimension: [3, 1, 80]
+    padding_value: [0, 0, -4]
+    frameshift: [null, null, 200]
+    pre_load: True
+    segment_length: -1 # all
+
+lr_scheduler:
+    _name: "ExponentialDecayLRScheduler"
+    warmup_steps: 20000
+    decay_scale: 20000
+    decay_learning_rate: 0.5
+    final_learning_rate: 1e-6
+
+# Only for Multi-GPU Training
+distributed:
+    dist_backend: "nccl"
+    dist_url: "tcp://localhost:54321"
+
+#################################################
+# Infer configuration
+#################################################
+
+save_features:
+    - ['embedding', '.npy', null]
+    - ['wav', '.wav', 24000]
