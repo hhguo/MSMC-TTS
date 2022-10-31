@@ -7,7 +7,7 @@ The latest MSMC-TTS (MSMC-TTS-v2) is optimized with a MSMC-VQ-GAN based autoenco
 
 ## News
 
-[2022.10.28] We release the latest version of MSMC-TTS (MSMC-TTS-v2) based on MSMC-VQ-GAN. Please refer to our latest paper ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Representation"](https://arxiv.org/abs/2209.10887)
+[2022.10.28] We release the latest version of MSMC-TTS (MSMC-TTS-v2) based on MSMC-VQ-GAN. Please refer to our latest paper ["Towards High-Quality Neural TTS for Low-Resource Languages by Learning Compact Representation"](https://arxiv.org/abs/2210.15131)
 
 [2022.10.18] We will release the code of all versions of MSMC-TTS in this repo. And anyone interested in this work is welcome to join us to explore more useful speech representations for speech synthesis. 
 
