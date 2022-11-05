@@ -42,7 +42,7 @@ Help you better train your models!
 #### MSMC-VQ-GAN
 1. Be careful for the compactness of your representation. For single-speaker standard TTS, you can try 2-4 heads, which each head may have 64 - 256 codewords.
 2. Please use fewer codewords if your batch size is too small, otherwise the frame size of a batch is insufficient to support the dynamic codebook update.
-3. You may change the weight of the encoder loss if you find that some stages in your MSMC-VQ-GAN learn nothing.
+3. You may change the weight of the encoder loss if you find that some stages in your MSMC-VQ-GAN learn nothing. You can also train a single-stage VQ-GAN to check the training status first, then add a stage. The VQ loss of any stage should not be too small, otherwise this stage may fail in modeling.
 
 ### Multi-Stage Predictor
 1. Triplet loss can improve the expressiveness of TTS, but also may degrade the smoothness. You may try different weights of Triplet loss, such as 0, 0.01, 0.1, 1, to find the most balanced performance.
