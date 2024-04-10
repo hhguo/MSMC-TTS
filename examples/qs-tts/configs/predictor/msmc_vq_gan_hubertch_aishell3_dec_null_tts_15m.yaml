@@ -1,53 +1,53 @@
-id: "msmc_vq_gan_am"
+id: "msmc_vq_gan_hubertch_aishell3_dec_null_tts_15m"
 
 #################################################
 # Task configuration
 #################################################
 
 task:
-    _name: "MSMCTTS"
+    _name: "NASynTTSv2"
     _mode: "train_predictor"
     predictor:
-        _name: "MultiStagePredictor"
+        _name: "NASynCascadeFastSpeech"
         n_symbols: [100, 10, 2]
-        n_model_size: 600
+        n_model_size: 256
         n_pred_size: 256
         n_pred_scale: [4, 1]
         encoder_config:
             max_seq_len: 240
-            n_layers: 6
+            n_layers: 4
             n_head: 2
             d_k: 64
             d_v: 64
-            d_model: 600
-            d_inner: 1536
+            d_model: 256
+            d_inner: 1024
             fft_conv1d_kernel: 3
             fft_conv1d_padding: 1
             dropout: 0.1
             name: phoneme_side
             fused_layernorm: False
         adaptor_config:
-            input_size: 600
+            input_size: 256
             duration_predictor_filter_size: 256
             duration_predictor_kernel_size: 3
             dropout: 0.1
             fused_layernorm: False
         decoder_config:
             max_seq_len: 2400
-            n_layers: 6
+            n_layers: 4
             n_head: 2
             d_k: 64
             d_v: 64
-            d_model: 600
-            d_inner: 1536
+            d_model: 256
+            d_inner: 1024
             fft_conv1d_kernel: 3
             fft_conv1d_padding: 1
             dropout: 0.1
             name: mel_side
             fused_layernorm: False
     autoencoder:
-        _config: examples/csmsc/configs/msmc_vq_gan.yaml
-        _checkpoint: examples/csmsc/checkpoints/msmc_vq_gan/model_800000
+        _config: egs/dpr_tts_16k/configs/synthesizer/transfer_learning/hubert_dec_null.yaml
+        _checkpoint: egs/dpr_tts_16k/checkpoints/synthesizer/transfer_learning/hubert_dec_null/model_500000
         _trainable: False
 
 #################################################
@@ -55,12 +55,12 @@ task:
 #################################################
 
 # Basic hyperparameters
-save_checkpoint_dir: "examples/csmsc/checkpoints/msmc_vq_gan_am"
+save_checkpoint_dir: "egs/dpr_tts_16k/checkpoints/predictor/msmc_vq_gan_hubertch_aishell3_dec_null_tts_15m"
 pretrain_checkpoint_path: ""
 restore_checkpoint_path: ""
 resume_training: True
-training_steps: 200000
-iters_per_checkpoint: 50000
+training_steps: 100000
+iters_per_checkpoint: 20000
 seed: 1234
 
 # CuDNN configuration
@@ -70,12 +70,12 @@ cudnn:
 
 # Specific trainer hyperparameters
 trainer:
-    _name: 'PredictorTrainer'
+    _name: 'NASynEmbFSTrainer'
     grad_clip_thresh: 10.0
     training_methods: ['mse', 'triple_sum']
     loss_weights:
-        - [1.0, 1.0]
-        - [1.0, 1.0]
+        - [1.0, 0]
+        - [1.0, 0]
     lambda_dur: 1.0
 
 optimizer:
@@ -92,15 +92,15 @@ dataloader:
 
 dataset:
     _name: 'TTSDataset'
-    id_list: "examples/csmsc/data/filelists/train.list"
-    samplerate: 24000
-    feature: ['text', 'dur', 'mel']
+    id_list: "/mnt/public/usr/haohanguo/corpus/csmsc/trainlists/train_15m.list"
+    samplerate: 16000
+    feature: ['text', 'dur', 'emb']
     feature_path:
-        - examples/csmsc/data/phone.txt
-        - examples/csmsc/data/dur.txt
-        - examples/csmsc/data/mel/{}.npy
-    dimension: [3, 1, 80]
-    padding_value: [0, 0, -4]
+        - /mnt/public/usr/haohanguo/corpus/csmsc/phone.txt
+        - /mnt/public/usr/haohanguo/corpus/csmsc/dur.txt
+        - /mnt/public/usr/haohanguo/corpus/csmsc/hubert_ch/{}.npy
+    dimension: [3, 1, 1024]
+    padding_value: [0, 0, 0]
     frameshift: [null, null, 200]
     pre_load: True
     segment_length: -1 # all
@@ -122,5 +122,4 @@ distributed:
 #################################################
 
 save_features:
-    - ['embedding', '.npy', null]
-    - ['wav', '.wav', 24000]
+    - ['wav', '.wav', 16000]
